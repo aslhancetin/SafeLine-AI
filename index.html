@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeLine - Yardım İstiyorum</title>
+    <meta
+      name="description"
+      content="Acil durumlar için bütüncül (fiziksel + psikolojik) ilk yardım prototipi."
+    />
+
+    <!-- Fast prototyping: Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Legible, calm typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #1a2b3c;
+        --soft: #e3f2fd;
+        --accent: #ff5a3c;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      /* Gentle breathing visualization (kept subtle; respects reduced motion). */
+      .breath {
+        animation: breath 3.6s ease-in-out infinite;
+      }
+      @keyframes breath {
+        0%,
+        100% {
+          transform: scale(0.98);
+          opacity: 0.85;
+        }
+        50% {
+          transform: scale(1.06);
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .breath {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="font-[Inter] bg-[#1A2B3C] text-white min-h-screen overflow-x-hidden">
+    <!-- Top padding + bottom space for fixed 112 bar -->
+    <div class="min-h-screen flex flex-col pb-28">
+      <main class="flex-1">
+        <div class="max-w-xl mx-auto px-4 pt-10">
+          <!-- Brand -->
+          <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#E3F2FD]/15 flex items-center justify-center border border-[#E3F2FD]/20">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 21s-7-4.35-7-10.2C5 7.06 7.24 5 10 5c1.4 0 2.57.66 3.2 1.67C13.83 5.66 15 5 16.4 5c2.76 0 5 2.06 5 5.8C21.4 16.65 12 21 12 21Z"
+                    stroke="#E3F2FD"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    opacity="0.95"
+                  />
+                </svg>
+              </div>
+              <div>
+                <div class="font-semibold tracking-wide leading-tight">SafeLine</div>
+                <div class="text-[#E3F2FD]/80 text-sm leading-tight">
+                  Bütüncül ilk yardım prototipi
+                </div>
+              </div>
+            </div>
+            <div class="hidden sm:flex items-center text-sm text-[#E3F2FD]/80">
+              <span class="inline-flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#E3F2FD]/60"></span>
+                Hazir
+              </span>
+            </div>
+          </div>
+
+          <!-- HERO -->
+          <section id="hero" class="text-center">
+            <button
+              id="btnHelp"
+              class="w-full rounded-2xl border border-[#E3F2FD]/20 bg-[#E3F2FD]/10 hover:bg-[#E3F2FD]/15 transition-colors py-6"
+              style="box-shadow: 0 10px 30px rgba(0,0,0,0.18)"
+            >
+              <div class="text-3xl sm:text-4xl font-bold leading-tight">
+                YARDIM İSTİYORUM
+              </div>
+              <div class="mt-2 text-[#E3F2FD]/90 text-base">
+                Sakin ol, yanındayım. Ne olduğunu anlat veya mikrofona konuş.
+              </div>
+            </button>
+          </section>
+
+          <!-- INPUT -->
+          <section id="inputArea" class="mt-8">
+            <div class="bg-white/5 border border-[#E3F2FD]/20 rounded-2xl p-4">
+              <div class="flex items-start gap-3">
+                <div class="flex-1">
+                  <label for="message" class="block text-[#E3F2FD]/90 text-sm mb-2">
+                    Durumu bildir (kisa yaz)
+                  </label>
+                  <textarea
+                    id="message"
+                    rows="3"
+                    class="w-full resize-none rounded-xl bg-[#1A2B3C]/40 border border-[#E3F2FD]/20 focus:outline-none focus:ring-2 focus:ring-[#E3F2FD]/40 p-3 text-base"
+                    placeholder="Orn: Nefesim daraliyor, bayilacak gibi oluyorum / Kanam var / Panik atak geçiriyorum..."
+                  ></textarea>
+                  <div class="mt-2 text-xs text-[#E3F2FD]/70">
+                    Prototip: Metinden otomatik siniflama yapar.
+                  </div>
+                </div>
+
+                <!-- Microphone -->
+                <button
+                  id="btnMic"
+                  type="button"
+                  class="shrink-0 w-12 h-12 rounded-2xl bg-[#E3F2FD]/10 border border-[#E3F2FD]/20 hover:bg-[#E3F2FD]/15 transition-colors grid place-items-center"
+                  aria-label="Mikrofondan konuş"
+                  title="Mikrofondan konuş"
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z"
+                      stroke="#E3F2FD"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      opacity="0.95"
+                    />
+                    <path
+                      d="M19 11a7 7 0 0 1-14 0"
+                      stroke="#E3F2FD"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      opacity="0.95"
+                    />
+                    <path
+                      d="M12 18v3"
+                      stroke="#E3F2FD"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      opacity="0.95"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <button
+                  id="btnSubmit"
+                  type="button"
+                  class="flex-1 rounded-xl bg-[#E3F2FD] text-[#1A2B3C] font-semibold py-3 hover:bg-[#d0e7ff] transition-colors"
+                >
+                  Durumu Onayla ve Talimatlari Goster
+                </button>
+              </div>
+
+              <div id="micStatus" class="mt-3 text-xs text-[#E3F2FD]/75 min-h-[18px]">
+                <!-- status injected -->
+              </div>
+            </div>
+          </section>
+
+          <!-- QUICK CHOICES -->
+          <section id="quickCards" class="mt-6">
+            <div class="text-[#E3F2FD]/90 font-semibold mb-3 text-sm">
+              Hızlı seçim
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                data-case="panic"
+                class="quickCase rounded-2xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 p-3 text-left"
+              >
+                <div class="font-semibold leading-snug">Panik Atak Geçiriyorum</div>
+                <div class="text-[#E3F2FD]/75 text-xs mt-1">Nefes + sakinlik</div>
+              </button>
+              <button
+                data-case="bleeding"
+                class="quickCase rounded-2xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 p-3 text-left"
+              >
+                <div class="font-semibold leading-snug">Yaralanma / Kanama</div>
+                <div class="text-[#E3F2FD]/75 text-xs mt-1">Durdur + koru</div>
+              </button>
+              <button
+                data-case="unconscious"
+                class="quickCase rounded-2xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 p-3 text-left"
+              >
+                <div class="font-semibold leading-snug">Bayılma / Nefes Sorunu</div>
+                <div class="text-[#E3F2FD]/75 text-xs mt-1">Hava yolu kontrolu</div>
+              </button>
+              <button
+                data-case="burn"
+                class="quickCase rounded-2xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 p-3 text-left"
+              >
+                <div class="font-semibold leading-snug">Yanık</div>
+                <div class="text-[#E3F2FD]/75 text-xs mt-1">Soğut + koru</div>
+              </button>
+            </div>
+          </section>
+
+          <!-- Dynamic panel -->
+          <section
+            id="panel"
+            class="mt-8 hidden"
+            aria-live="polite"
+          >
+            <div class="bg-white/5 border border-[#E3F2FD]/20 rounded-2xl p-4">
+              <div class="flex items-start justify-between gap-3 mb-4">
+                <div>
+                  <div class="text-[#E3F2FD]/90 text-sm font-semibold">
+                    Müdahale Paneli
+                  </div>
+                  <div id="caseTitle" class="text-xl font-bold mt-1">
+                    <!-- injected -->
+                  </div>
+                </div>
+                <button
+                  id="btnReset"
+                  type="button"
+                  class="rounded-xl border border-[#E3F2FD]/20 bg-[#1A2B3C]/20 hover:bg-[#1A2B3C]/35 px-3 py-2 text-sm"
+                >
+                  Degistir
+                </button>
+              </div>
+
+              <div class="flex flex-col md:flex-row gap-4">
+                <!-- Steps -->
+                <div class="flex-1">
+                  <div class="text-[#E3F2FD]/80 text-sm font-semibold mb-2">
+                    Adim adim
+                  </div>
+                  <div
+                    id="ai-response"
+                    class="space-y-3 whitespace-pre-wrap text-base sm:text-lg text-[#E3F2FD]/95 leading-relaxed"
+                  >
+                    <!-- AI yanıtı buraya yazılır -->
+                  </div>
+                </div>
+
+                <!-- Calm visual -->
+                <div class="md:w-[240px] shrink-0">
+                  <div
+                    class="rounded-2xl border border-[#E3F2FD]/20 bg-[#1A2B3C]/35 p-4 text-center"
+                  >
+                    <div class="text-[#E3F2FD]/80 text-sm font-semibold mb-3">
+                      Sakinlik icin
+                    </div>
+
+                    <div class="relative mx-auto w-28 h-28">
+                      <div class="absolute inset-0 rounded-full border-2 border-[#E3F2FD]/35 breath"></div>
+                      <div class="absolute inset-4 rounded-full bg-[#E3F2FD]/10 border border-[#E3F2FD]/20"></div>
+                      <div class="absolute inset-[18px] rounded-full bg-[#E3F2FD]/15"></div>
+                    </div>
+
+                    <div id="supportMsg" class="mt-4 text-base font-semibold leading-snug">
+                      <!-- injected -->
+                    </div>
+
+                    <div id="supportSub" class="mt-2 text-xs text-[#E3F2FD]/75">
+                      <!-- injected -->
+                    </div>
+
+                    <div
+                      id="geoStatus"
+                      class="mt-3 text-xs text-[#E3F2FD]/75 min-h-[18px]"
+                    >
+                      Konum paylasimi istege baglidir.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 text-xs text-[#E3F2FD]/65">
+                Not: Bu bir prototiptir. Gercek hayatta yerel acil numarayi arayip profesyonel destek alin.
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Fixed Emergency Bar -->
+      <div
+        class="fixed bottom-0 left-0 right-0 z-50 bg-[#ff5a3c] border-t border-white/20"
+      >
+        <div class="max-w-xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div class="flex-1">
+            <div class="font-bold text-white leading-tight">Acil Yardim</div>
+            <div class="text-white/90 text-xs leading-tight">
+              Tıklayınca `112` arama seceresi açılır.
+            </div>
+          </div>
+          <a
+            href="#"
+            id="call112"
+            class="rounded-xl bg-white/15 hover:bg-white/20 border border-white/25 px-4 py-3 text-sm font-semibold text-white whitespace-nowrap"
+          >
+            112'yi Ara
+          </a>
+        </div>
+      </div>
+
+      <!-- Call modal -->
+      <div
+        id="modalOverlay"
+        class="fixed inset-0 z-[60] hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative w-[calc(100%-24px)] max-w-md mx-auto mt-[20vh]">
+          <div class="rounded-2xl bg-[#1A2B3C] border border-[#E3F2FD]/20 p-4 shadow-2xl">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div id="modalTitle" class="text-lg font-bold">112'yi aramak istiyor musun?</div>
+                <div class="text-xs text-[#E3F2FD]/75 mt-1">
+                  Ekranda yasadisin/yerin acil durum numarasi degisebilir. Bu prototip 112 icin tasarlanmistir.
+                </div>
+              </div>
+              <button
+                id="btnCloseModal"
+                class="rounded-xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
+                aria-label="Kapat"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <div class="mt-4 flex gap-3">
+              <a
+                id="tel112"
+                href="tel:112"
+                class="flex-1 rounded-xl bg-[#E3F2FD] text-[#1A2B3C] font-semibold py-3 text-center hover:bg-[#d0e7ff] transition-colors"
+              >
+                112'yi Ara
+              </a>
+              <button
+                id="btnCancelModal"
+                class="flex-1 rounded-xl border border-[#E3F2FD]/20 bg-white/5 hover:bg-white/10 font-semibold py-3 text-center transition-colors"
+              >
+                Vazgec
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ----------------------------
+      // Groq API (Llama 3.3 70b)
+      // ----------------------------
+      // NOTE: Sunumdan önce kendi Groq anahtarını buraya yapıştır.
+      const GROQ_API_KEY = "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";
+      const GROQ_MODEL = "llama-3.3-70b-versatile";
+      const GROQ_ENDPOINT =
+        "https://api.groq.com/openai/v1/chat/completions";
+      const GROQ_SYSTEM_PROMPT =
+        "Sen SafeLine acil durum asistanısın. SADECE hayat kurtarıcı, kısa ve numaralandırılmış (1, 2, 3...) adımlar ver. Giriş cümlesi kurma. En sona mutlaka \"112'yi arayın\" notunu ekle.";
+
+      // ----------------------------
+      // Case configuration
+      // ----------------------------
+      const CASES = {
+        panic: {
+          title: "Panik Atak Geçiriyorum",
+          steps: [
+            "1. Omuzlarini gevset ve çeneni serbest birak. Kendine: “Sadece dalga geciyor.” de.",
+            "2. 4 saniye burundan nefes al, 6 saniye agizdan yavasca ver. Bunu 5 tur yap.",
+            "3. Etrafinda 5 sey say: 5'i gör, 4'ünü duy, 3'ünü hisset, 2'sini kokla, 1'ini tad. Simdiye dön.",
+            "4. Hiperventilasyondan kaçin: kisa ve hizli nefes almak yerine yavas nefes tut."
+          ],
+          supportMsg: "Harika gidiyorsun, ambulans yolda.",
+          supportSub: "Şu an güvendesin. Nefes dalgası düşecek."
+        },
+        bleeding: {
+          title: "Yaralanma / Kanama",
+          steps: [
+            "1. Dogrudan güvenlik sagla: tehlike yoksa yardim et. Kendini riske atma.",
+            "2. Temiz bir bez/gaz ile kanayan yere bastir. Süreklilik sagla, aralik verme.",
+            "3. Bandaj/sargiyi kanamayla birlikte “ıslaniyor diye” cikarip yok etme; ust katman ekle.",
+            "4. Kanama durmuyor, cok yogunsa veya hissizlesme/solukluk varsa 112’yi arayip profesyonel destek al."
+          ],
+          supportMsg: "Harika gidiyorsun, ambulans yolda.",
+          supportSub: "Baskiyi kesmeden devam ettir. Durumu takip et."
+        },
+        unconscious: {
+          title: "Bayılma / Nefes Sorunu",
+          steps: [
+            "1. Kisa kontrol: Bilinci var mi? Seslen, omzuna hafif dokun.",
+            "2. Nefes alis/verişini kontrol et. Normal nefes varsa: kisiyi yan pozisyona al (güvenli pozisyon).",
+            "3. Nefes yoksa veya anormal ise 112'yi ara ve CPR/temel destek icin talimatlari takip et.",
+            "4. Kusma/kan varsa hava yolunu tikanmadan tut; nefesin acik kalmasina odaklan."
+          ],
+          supportMsg: "Harika gidiyorsun, ambulans yolda.",
+          supportSub: "112’yi aramayi erteleme. Profesyoneller geliyor."
+        },
+        burn: {
+          title: "Yanık",
+          steps: [
+            "1. Isiya maruziyeti kes: alev/elektrik/sicak yüzeyle temasi durdur.",
+            "2. Yanigi 20 dakika serin suyla sogut (buzla dogrudan temas etme).",
+            "3. Kabarciklari patlatma. Temiz, yapismayan bir örtüyle hafifçe kapat.",
+            "4. Yüz/el/genis alan/çok siddetli aci varsa 112’yi arayip tıbbi destek al."
+          ],
+          supportMsg: "Harika gidiyorsun, ambulans yolda.",
+          supportSub: "Soğutmayı güvenle uygula. Kabarikliklara dokunma."
+        }
+      };
+
+      // ----------------------------
+      // DOM helpers
+      // ----------------------------
+      const $ = (id) => document.getElementById(id);
+      const hero = $("hero");
+      const inputArea = $("inputArea");
+      const quickCards = $("quickCards");
+      const panel = $("panel");
+      const caseTitle = $("caseTitle");
+      const aiResponseEl = $("ai-response");
+      const supportMsg = $("supportMsg");
+      const supportSub = $("supportSub");
+      const geoStatus = $("geoStatus");
+
+      let geolocationRequested = false;
+
+      // ----------------------------
+      // TTS helpers (unlock + speak)
+      // ----------------------------
+      let ttsUnlocked = false;
+      function unlockTTS() {
+        if (ttsUnlocked) return;
+        try {
+          const supported =
+            "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+          if (!supported) return;
+
+          // Silent utterance triggers "user gesture" constraints for many browsers.
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(" ");
+          u.lang = "tr-TR";
+          u.rate = 1;
+          u.pitch = 1;
+          u.volume = 0; // silent unlock
+          u.onend = () => {
+            try {
+              window.speechSynthesis.cancel();
+            } catch (_) {}
+          };
+          window.speechSynthesis.speak(u);
+          ttsUnlocked = true;
+        } catch (err) {
+          console.warn("TTS unlock failed:", err);
+        }
+      }
+
+      function speakAIText(text) {
+        const t = (text || "").trim();
+        if (!t) return;
+
+        try {
+          const supported =
+            "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+          if (!supported) {
+            tryRestartMicIfContinuous();
+            return;
+          }
+
+          window.speechSynthesis.cancel();
+
+          const utter = new SpeechSynthesisUtterance(t);
+          utter.lang = "tr-TR";
+          utter.rate = 1;
+          utter.pitch = 1;
+
+          const voices = window.speechSynthesis.getVoices?.() || [];
+          const trVoice =
+            voices.find((v) => (v.lang || "").toLowerCase().startsWith("tr")) ||
+            voices.find((v) => /tr/i.test(v.name || "")) ||
+            voices[0];
+          if (trVoice) utter.voice = trVoice;
+
+          utter.onerror = (e) => console.warn("TTS error:", e);
+          utter.onend = () => {
+            tryRestartMicIfContinuous();
+          };
+          window.speechSynthesis.speak(utter);
+        } catch (err) {
+          console.warn("TTS failed:", err);
+          tryRestartMicIfContinuous();
+        }
+      }
+
+      // ----------------------------
+      // Geolocation helpers
+      // ----------------------------
+      function setGeoStatus(text, isOk = true) {
+        if (!geoStatus) return;
+        geoStatus.textContent = text;
+        geoStatus.className =
+          "mt-3 text-xs " + (isOk ? "text-[#E3F2FD]/75" : "text-[#ffbfaa]/95 min-h-[18px]");
+      }
+
+      function requestGeolocationOnce() {
+        if (geolocationRequested) return;
+        geolocationRequested = true;
+
+        if (
+          typeof navigator === "undefined" ||
+          !("geolocation" in navigator) ||
+          !navigator.geolocation
+        ) {
+          setGeoStatus("Konum ozelligi desteklenmiyor.", false);
+          return;
+        }
+
+        setGeoStatus("Konum alinmaktadir...", true);
+
+        try {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const lat = pos?.coords?.latitude;
+              const lon = pos?.coords?.longitude;
+              const acc = pos?.coords?.accuracy;
+
+              if (typeof lat !== "number" || typeof lon !== "number") {
+                setGeoStatus("Konum bilgisi alinmadi. Yine de talimatlari uygula.", false);
+                return;
+              }
+
+              const latStr = lat.toFixed(5);
+              const lonStr = lon.toFixed(5);
+              const accStr =
+                typeof acc === "number" ? ` (±${Math.round(acc)} m)` : "";
+
+              setGeoStatus(
+                `Şu an ${latStr}, ${lonStr} koordinatlarında konumundasın${accStr}. Yardım ekiplerine yer bildirimi yapılabilir.`,
+                true
+              );
+            },
+            (err) => {
+              console.warn("Geolocation error:", err);
+              if (err?.code === 1) {
+                setGeoStatus(
+                  "Konum izni verilmedi. Yine de talimatlari uygula.",
+                  false
+                );
+              } else {
+                setGeoStatus(
+                  "Konum alinamadi. Yine de talimatlari uygula.",
+                  false
+                );
+              }
+            },
+            { enableHighAccuracy: true, timeout: 9000, maximumAge: 30000 }
+          );
+        } catch (err) {
+          console.warn("Geolocation exception:", err);
+          setGeoStatus("Konum alinamadi. Yine de talimatlari uygula.", false);
+        }
+      }
+
+      function setPanel(caseKey) {
+        // Başlık, sabit bir vaka adı değil; handleResponse içinde kullanıcı metnine göre güncellenir.
+        // (caseKey burada sadece mevcut çağrı imzasını korumak için tutuluyor.)
+        void caseKey;
+        caseTitle.textContent = "Durum bildiriliyor...";
+        // Statik adimlar yerine AI yanıtını gösteriyoruz.
+        aiResponseEl.textContent = "Yanıt hazırlanıyor...";
+        supportMsg.textContent = "Harika gidiyorsun, ambulans yolda.";
+        supportSub.textContent = "Şimdi sakin bir şekilde adımları birlikte uygulayalım.";
+        if (geoStatus) setGeoStatus("Konum paylasimi istege baglidir.", true);
+
+        panel.classList.remove("hidden");
+        hero.classList.add("hidden");
+        inputArea.classList.add("hidden");
+        quickCards.classList.add("hidden");
+      }
+
+      function reset() {
+        panel.classList.add("hidden");
+        hero.classList.remove("hidden");
+        inputArea.classList.remove("hidden");
+        quickCards.classList.remove("hidden");
+        $("message").value = "";
+        $("micStatus").textContent = "";
+        aiResponseEl.textContent = "";
+        activeCase = null;
+        continuousVoiceSession = false;
+      }
+
+      // Simple keyword classification for prototype
+      function classifyFromText(text) {
+        const t = (text || "").toLowerCase();
+        const hasAny = (arr) => arr.some((k) => t.includes(k));
+
+        if (hasAny(["panik", "korku", "nefesim", "çarpınt", "göğsüm", "anksiyete"])) return "panic";
+        if (hasAny(["kan", "kanama", "yaralan", "kesik", "darb", "sarg"])) return "bleeding";
+        if (hasAny(["bay", "bilinc", "nefes", "soluk", "morarm", "cok zor"])) return "unconscious";
+        if (hasAny(["yanik", "yandi", "yak", "isc", "kaynar"])) return "burn";
+
+        return "panic";
+      }
+
+      let activeCase = null;
+
+      async function streamGroqResponse(userText) {
+        const res = await fetch(GROQ_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: GROQ_MODEL,
+            stream: true,
+            temperature: 0.25,
+            max_tokens: 512,
+            messages: [
+              { role: "system", content: GROQ_SYSTEM_PROMPT },
+              { role: "user", content: `Kullanıcının durumu: ${userText}` },
+            ],
+          }),
+        });
+
+        if (!res.ok) {
+          const maybeText = await res.text().catch(() => "");
+          throw new Error(
+            `Groq isteği başarısız. HTTP ${res.status}. ${maybeText}`
+          );
+        }
+
+        if (!res.body) throw new Error("Stream body alınamadı.");
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+        let streamedText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary !== -1) {
+            const block = buffer.slice(0, boundary).trim();
+            buffer = buffer.slice(boundary + 2);
+            boundary = buffer.indexOf("\n\n");
+
+            if (!block) continue;
+
+            const dataLines = block
+              .split("\n")
+              .map((line) => line.trim())
+              .filter((line) => line.startsWith("data:"))
+              .map((line) => line.slice(5).trim());
+
+            for (const dataLine of dataLines) {
+              if (!dataLine || dataLine === "[DONE]") continue;
+
+              let payload;
+              try {
+                payload = JSON.parse(dataLine);
+              } catch {
+                continue;
+              }
+
+              const delta = payload?.choices?.[0]?.delta?.content;
+              if (typeof delta !== "string" || !delta) continue;
+
+              streamedText += delta;
+              aiResponseEl.textContent = streamedText;
+            }
+          }
+        }
+
+        return streamedText.trim();
+      }
+
+      // Groq'a metin gönderip yanıtı sayfadaki alana yazar
+      async function handleResponse(userText) {
+        const text = (userText || "").trim();
+        if (!text) {
+          caseTitle.textContent = "Özel Durum Bildirildi";
+          aiResponseEl.textContent =
+            "Önce durumunu yaz (ör: nefesim daralıyor / kanama / bayılacak gibi...).";
+          return;
+        }
+
+        // Başlığı, kullanıcı girdisinin ilk 30 karakteri ile dinamik güncelle.
+        // Örn: "Doğuruyorum" -> "Durum: Doğuruyorum"
+        const snippet = text.length > 30 ? text.slice(0, 30).trimEnd() : text;
+        caseTitle.textContent = `Durum: ${snippet}`;
+
+        aiResponseEl.textContent = "";
+
+        try {
+          const output = await streamGroqResponse(text);
+          if (!output) throw new Error("empty-response");
+          speakAIText(output);
+        } catch (err) {
+          console.warn("Groq isteği hatası:", err);
+          aiResponseEl.textContent = "Lütfen 112'yi arayın";
+          tryRestartMicIfContinuous();
+        }
+      }
+
+      // ----------------------------
+      // Events
+      // ----------------------------
+      $("btnHelp").addEventListener("click", () => {
+        unlockTTS();
+        const msg = $("message").value.trim();
+        activeCase = msg ? classifyFromText(msg) : "panic";
+        setPanel(activeCase);
+        requestGeolocationOnce();
+        handleResponse(msg);
+      });
+
+      $("btnSubmit").addEventListener("click", () => {
+        unlockTTS();
+        const msg = $("message").value.trim();
+        activeCase = msg ? classifyFromText(msg) : "panic";
+        setPanel(activeCase);
+        requestGeolocationOnce();
+        handleResponse(msg);
+      });
+
+      $("message").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          $("btnSubmit").click();
+        }
+      });
+
+      document.querySelectorAll(".quickCase").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          unlockTTS();
+          activeCase = btn.getAttribute("data-case");
+          // Hızlı kartlar, kullanıcının metin girişini doldurmak yerine
+          // "durum kısayolu" olarak Groq'ya girdi sağlar.
+          const t = (btn.textContent || "").trim();
+          $("message").value = t;
+          setPanel(activeCase);
+          requestGeolocationOnce();
+          handleResponse(t);
+        });
+      });
+
+      $("btnReset").addEventListener("click", reset);
+
+      // ----------------------------
+      // Call 112 modal
+      // ----------------------------
+      const modalOverlay = $("modalOverlay");
+      const tel112 = $("tel112");
+
+      function openModal() {
+        modalOverlay.classList.remove("hidden");
+      }
+      function closeModal() {
+        modalOverlay.classList.add("hidden");
+      }
+
+      $("call112").addEventListener("click", (e) => {
+        e.preventDefault();
+        openModal();
+      });
+      $("btnCloseModal").addEventListener("click", closeModal);
+      $("btnCancelModal").addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
+
+      // ----------------------------
+      // PWA (Service Worker)
+      // ----------------------------
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./service-worker.js")
+            .catch((e) =>
+              console.warn("Service worker registration failed:", e)
+            );
+        });
+      }
+
+      // ----------------------------
+      // Microphone (prototype)
+      // Uses Web Speech API when available.
+      // ----------------------------
+      let recognition = null;
+      let listening = false;
+      let continuousVoiceSession = false;
+
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      function tryRestartMicIfContinuous() {
+        if (!continuousVoiceSession || !recognition) return;
+        setTimeout(() => {
+          if (listening) return;
+          try {
+            recognition.start();
+          } catch (err) {
+            console.warn("Mic restart failed:", err);
+          }
+        }, 350);
+      }
+
+      function setMicStatus(text, isOk = true) {
+        const el = $("micStatus");
+        el.textContent = text;
+        el.className =
+          "mt-3 text-xs " + (isOk ? "text-[#E3F2FD]/75" : "text-[#ffbfaa]/95 min-h-[18px]");
+      }
+
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = "tr-TR";
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          listening = true;
+          setMicStatus("Dinliyorum... konusmaya devam et.", true);
+        };
+
+        recognition.onend = () => {
+          listening = false;
+          // If user didn't type anything, keep existing text.
+          if (!$("message").value.trim()) {
+            setMicStatus("Dinleme durdu. Metin girebilirsin.", true);
+          }
+        };
+
+        recognition.onerror = (event) => {
+          listening = false;
+          setMicStatus(
+            "Mikrofon calismadi. Tarayici izinlerini kontrol et.",
+            false
+          );
+          console.warn("SpeechRecognition error:", event);
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          const trimmed = transcript.trim();
+          $("message").value = trimmed;
+
+          const last = event.results[event.results.length - 1];
+          const isFinal = !!(last && last.isFinal);
+
+          if (!isFinal) {
+            setMicStatus("Dinliyorum... konusmaya devam et.", true);
+            return;
+          }
+
+          if (!trimmed) {
+            setMicStatus("Tamam. Durumu onaylayabilirsin.", true);
+            return;
+          }
+
+          setMicStatus("Gonderiliyor...", true);
+          continuousVoiceSession = true;
+          try {
+            recognition.stop();
+          } catch (_) {}
+          setTimeout(() => {
+            $("btnSubmit").click();
+          }, 0);
+        };
+      } else {
+        // Graceful fallback if SpeechRecognition isn't supported
+        $("btnMic").disabled = true;
+        $("btnMic").classList.add("opacity-50", "cursor-not-allowed");
+        setMicStatus("Sesli komut bu tarayicida desteklenmiyor.", true);
+      }
+
+      $("btnMic").addEventListener("click", async () => {
+        if (!recognition) {
+          setMicStatus("Sesli komut desteklenmiyor.", false);
+          return;
+        }
+
+        if (!listening) {
+          try {
+            // Some browsers require user gesture (we are in click handler).
+            recognition.start();
+          } catch (err) {
+            console.warn(err);
+            setMicStatus("Mikrofon baslatilamadi. Tekrar dene.", false);
+          }
+        } else {
+          recognition.stop();
+          setMicStatus("Bekle... tekrar konusabilirsin.", true);
+        }
+      });
+    </script>
+  </body>
+</html>
+
