@@ -19,7 +19,7 @@ Anlık Strateji Üretimi: Llama 3.3 (Groq) modeli, saniyeler içinde sadece haya
 Sesli Yönlendirme: Talimatlar cihaz tarafından sesli okunur, böylece kullanıcı ekrana bakmadan hastaya müdahale edebilir.
 
  ## Canlı Demo
-https://cerulean-dasik-e1df36.netlify.app/
+ https://safelineai.netlify.app/
 
 
 https://www.loom.com/share/8e3d414065dd4d64a600fbd52ef2b6db
