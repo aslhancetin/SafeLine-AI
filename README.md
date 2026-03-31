@@ -20,6 +20,8 @@ Sesli Yönlendirme: Talimatlar cihaz tarafından sesli okunur, böylece kullanı
 
  ## Canlı Demo
 https://cerulean-dasik-e1df36.netlify.app/
+
+
 https://www.loom.com/share/8e3d414065dd4d64a600fbd52ef2b6db
 
 🛠️ Teknoloji Yığını (Tech Stack)
